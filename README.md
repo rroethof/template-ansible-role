@@ -7,6 +7,11 @@
 ![Ansible Role](https://img.shields.io/ansible/role/d/rroethof/template-ansible-role)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
+[![github](https://img.shields.io/badge/GitHub-rroethof-181717.svg?style=flat&logo=github)](https://github.com/rroethof)
+[![twitter](https://img.shields.io/badge/Twitter-@rroethof-00aced.svg?style=flat&logo=twitter)](https://twitter.com/rroethof)
+[![website](https://img.shields.io/badge/Website-RonnyRoethof-5087B2.svg?style=flat&logo=telegram)](https://roethof.net)
+[![website](https://img.shields.io/badge/Resume-RonnyRoethof-5087B2.svg?style=flat&logo=telegram)](https://ronnyroethof.nl)
+
 > **A reusable Ansible role template for quickly starting new roles with best practices, CI, and Molecule testing.**
 
 ---
@@ -58,7 +63,7 @@ This repository provides a template for creating new Ansible roles, including:
 
 Install this role from Ansible Galaxy:
 
-```bash
+```
 ansible-galaxy install rroethof.ansibletemplate
 ```
 
@@ -66,7 +71,7 @@ ansible-galaxy install rroethof.ansibletemplate
 
 Default values are defined in [`defaults/main.yml`](https://github.com/rroethof/template-ansible-role/blob/main/defaults/main.yml):
 
-```yaml
+```
 # Example variable
 template_example_variable: "default_value"
 ```
@@ -81,7 +86,7 @@ None.
 
 This example is taken from [`molecule/default/converge.yml`](https://github.com/rroethof/template-ansible-role/blob/main/molecule/default/converge.yml) and is tested on each push, pull request, and release:
 
-```yaml
+```
 - name: Converge
   hosts: all
   become: yes
@@ -101,13 +106,13 @@ This role is tested using [Molecule](https://molecule.readthedocs.io/) with the 
 
 1. Install Python dependencies:
 
-   ```bash
+   ```
    python -m pip install --upgrade -r requirements.txt
    ```
 
 2. Run tests for a specific distribution:
 
-   ```bash
+   ```
    # For Debian 12
    $env:MOLECULE_DISTRO="debian12"; molecule test
 
