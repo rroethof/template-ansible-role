@@ -1,0 +1,113 @@
+---
+name: CI
+'on':
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+defaults:
+  run:
+    working-directory: 'rroethof.ansibletemplate'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          path: 'rroethof.ansibletemplate'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yamllint ansible-lint
+
+      - name: Run yamllint
+        run: yamllint .
+
+      - name: Run ansible-lint
+        run: ansible-lint
+
+  molecule:
+    name: Molecule
+    needs: [lint]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro:
+          - debian12
+          - ubuntu2404
+      fail-fast: false
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          path: 'rroethof.ansibletemplate'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          version: latest
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "molecule>=5.0" "molecule-plugins[docker]" "ansible-core>=2.12" docker
+
+      - name: Run molecule test
+        run: molecule test
+        working-directory: rroethof.ansibletemplate
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}
+          DOCKER_HOST: "unix:///var/run/docker.sock"
+          ANSIBLE_REMOTE_USER: root
+          MOLECULE_NO_LOG: false
+
+  galaxy:
+    name: Import to Galaxy
+    needs: [lint, molecule]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          path: 'rroethof.ansibletemplate'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-core
+
+      - name: Trigger Galaxy import
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          ansible-galaxy role import \
+            --api-key ${{ secrets.GALAXY_API_KEY }} \
+            ${REPO_OWNER} ${REPO_NAME}
+        working-directory: rroethof.ansibletemplate
